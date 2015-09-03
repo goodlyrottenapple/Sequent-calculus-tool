@@ -43,7 +43,7 @@ object PrintCalc{
 		case ISABELLE_SE =>
 			in match {
 				case Atprop_Freevar(a) => stringToString(a, format)
-				case Atpropa(a) => "(" + "Atprop" + " " + stringToString(a, format) + ")"
+				case Atpropa(a) => stringToString(a, format)
 			}
 	}
 
@@ -75,10 +75,10 @@ object PrintCalc{
 			}
 		case ISABELLE_SE =>
 			in match {
-				case Formula_Un(a,b) => "(" + "U\\<^sub>F" + " " + formula_un_opToString(a, format) + " " + formulaToString(b, format) + ")"
-				case Formula_Bin(a,b,c) => "(" + "B\\<^sub>F" + " " + formulaToString(a, format) + " " + formula_bin_opToString(b, format) + " " + formulaToString(c, format) + ")"
-				case Formula_Freevar(a) => "(" + "?\\<^sub>F" + " " + stringToString(a, format) + ")"
-				case Formula_Atprop(a) => "(" + atpropToString(a, format) + " " + "\\<^sub>A" + ")"
+				case Formula_Un(a,b) => "(" + formula_un_opToString(a, format) + " " + formulaToString(b, format) + ")"
+				case Formula_Bin(a,b,c) => "(" + formulaToString(a, format) + " " + formula_bin_opToString(b, format) + " " + formulaToString(c, format) + ")"
+				case Formula_Freevar(a) => stringToString(a, format)
+				case Formula_Atprop(a) => atpropToString(a, format)
 			}
 	}
 
@@ -192,9 +192,9 @@ object PrintCalc{
 		case ISABELLE_SE =>
 			in match {
 				case Structure_Formula(a) => "(" + formulaToString(a, format) + " " + "\\<^sub>S" + ")"
-				case Structure_Zer(a) => "(" + "Z\\<^sub>S" + " " + structure_zer_opToString(a, format) + ")"
-				case Structure_Freevar(a) => "(" + "?\\<^sub>S" + " " + stringToString(a, format) + ")"
-				case Structure_Bin(a,b,c) => "(" + "B\\<^sub>S" + " " + structureToString(a, format) + " " + structure_bin_opToString(b, format) + " " + structureToString(c, format) + ")"
+				case Structure_Zer(a) => structure_zer_opToString(a, format)
+				case Structure_Freevar(a) => stringToString(a, format)
+				case Structure_Bin(a,b,c) => "(" + structureToString(a, format) + " " + structure_bin_opToString(b, format) + " " + structureToString(c, format) + ")"
 			}
 	}
 

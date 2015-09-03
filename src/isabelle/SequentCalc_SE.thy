@@ -44,41 +44,41 @@ fun pairs :: "'a list \<Rightarrow> 'b list \<Rightarrow> ('a \<times> 'b) list"
 
 (*calc_structure_rules_se-BEGIN*)
 inductive derivable :: "Locale list \<Rightarrow> Sequent \<Rightarrow> bool"  (infix "\<turnstile>d" 300) where
-SingleCut: "(CutFormula f) \<in> set l \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S W)) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S Z) ,\<^sub>S (?\<^sub>S Y)))"
+SingleCut: "(CutFormula f) \<in> set l \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S W) \<turnstile>\<^sub>S (Z ,\<^sub>S Y))"
 | 
-Not_L: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S Y))) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((U\<^sub>F \<not>\<^sub>F (?\<^sub>F A)) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-And_L_1: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Z)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<and>\<^sub>F (?\<^sub>F B)) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Z))"|
-And_L_2: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Z)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<and>\<^sub>F (?\<^sub>F B)) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Z))"|
-ImpR_R: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S Z) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F B) \<^sub>S) ,\<^sub>S (?\<^sub>S X))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<rightarrow>\<^sub>F (?\<^sub>F B)) \<^sub>S) ,\<^sub>S (?\<^sub>S X)))"|
-Or_L: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S Z) ,\<^sub>S ((?\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S W)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Z)) ,\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<or>\<^sub>F (?\<^sub>F B)) \<^sub>S)) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S W)))"|
-Not_R: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((U\<^sub>F \<not>\<^sub>F (?\<^sub>F A)) \<^sub>S) ,\<^sub>S (?\<^sub>S Y)))"|
-ImpR_L: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S Z) ,\<^sub>S ((?\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S W)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S Y))) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Z)) ,\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<rightarrow>\<^sub>F (?\<^sub>F B)) \<^sub>S)) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S W)))"|
-And_R: "l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F B) \<^sub>S) ,\<^sub>S (?\<^sub>S W))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S Y))) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Z)) \<turnstile>\<^sub>S (B\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<and>\<^sub>F (?\<^sub>F B)) \<^sub>S) ,\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S W))))"|
-Or_R_2: "l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F B) \<^sub>S) ,\<^sub>S (?\<^sub>S X))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<or>\<^sub>F (?\<^sub>F B)) \<^sub>S) ,\<^sub>S (?\<^sub>S X)))"|
-Or_R_1: "l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S X))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S Z) \<turnstile>\<^sub>S (B\<^sub>S ((B\<^sub>F (?\<^sub>F A) \<or>\<^sub>F (?\<^sub>F B)) \<^sub>S) ,\<^sub>S (?\<^sub>S X)))"
+Not_L: "l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S ((\<not>\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S Y)"|
+And_L_1: "l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Z) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S ((A \<and>\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S Z)"|
+And_L_2: "l \<turnstile>d ((X ,\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S Z) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S ((A \<and>\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S Z)"|
+ImpR_R: "l \<turnstile>d ((Z ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S ((B \<^sub>S) ,\<^sub>S X)) \<Longrightarrow> l \<turnstile>d (Z \<turnstile>\<^sub>S (((A \<rightarrow>\<^sub>F B) \<^sub>S) ,\<^sub>S X))"|
+Or_L: "l \<turnstile>d ((Z ,\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S W) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (((X ,\<^sub>S Z) ,\<^sub>S ((A \<or>\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S (Y ,\<^sub>S W))"|
+Not_R: "l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (((\<not>\<^sub>F A) \<^sub>S) ,\<^sub>S Y))"|
+ImpR_L: "l \<turnstile>d ((Z ,\<^sub>S (B \<^sub>S)) \<turnstile>\<^sub>S W) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (((X ,\<^sub>S Z) ,\<^sub>S ((A \<rightarrow>\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S (Y ,\<^sub>S W))"|
+And_R: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((B \<^sub>S) ,\<^sub>S W)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S Z) \<turnstile>\<^sub>S (((A \<and>\<^sub>F B) \<^sub>S) ,\<^sub>S (Y ,\<^sub>S W)))"|
+Or_R_2: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((B \<^sub>S) ,\<^sub>S X)) \<Longrightarrow> l \<turnstile>d (Z \<turnstile>\<^sub>S (((A \<or>\<^sub>F B) \<^sub>S) ,\<^sub>S X))"|
+Or_R_1: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S X)) \<Longrightarrow> l \<turnstile>d (Z \<turnstile>\<^sub>S (((A \<or>\<^sub>F B) \<^sub>S) ,\<^sub>S X))"
 | 
-W_L: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-P_L: "l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X1) ,\<^sub>S (?\<^sub>S A)) ,\<^sub>S (B\<^sub>S (?\<^sub>S B) ,\<^sub>S (?\<^sub>S X2))) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X1) ,\<^sub>S (?\<^sub>S B)) ,\<^sub>S (B\<^sub>S (?\<^sub>S A) ,\<^sub>S (?\<^sub>S X2))) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-I_R_R2: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (Z\<^sub>S I)))"|
-A_R2: "l \<turnstile>d ((?\<^sub>S W) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S Z)))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S W) \<turnstile>\<^sub>S (B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Y)) ,\<^sub>S (?\<^sub>S Z)))"|
-A_R: "l \<turnstile>d ((?\<^sub>S W) \<turnstile>\<^sub>S (B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Y)) ,\<^sub>S (?\<^sub>S Z))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S W) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S Z))))"|
-I_R_L: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (Z\<^sub>S I) ,\<^sub>S (?\<^sub>S Y))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-I_L_L2: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (Z\<^sub>S I) ,\<^sub>S (?\<^sub>S X)) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-I_L_R: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (Z\<^sub>S I)) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-C_L: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S ((?\<^sub>F A) \<^sub>S))) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-C_R: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S ((?\<^sub>F A) \<^sub>S)) ,\<^sub>S (?\<^sub>S Y))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S Y)))"|
-I_L_L: "l \<turnstile>d ((B\<^sub>S (Z\<^sub>S I) ,\<^sub>S (?\<^sub>S X)) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-I_R_R: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (Z\<^sub>S I))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-I_L_R2: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (Z\<^sub>S I)) \<turnstile>\<^sub>S (?\<^sub>S Y))"|
-A_L: "l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Y)) ,\<^sub>S (?\<^sub>S Z)) \<turnstile>\<^sub>S (?\<^sub>S W)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S Z))) \<turnstile>\<^sub>S (?\<^sub>S W))"|
-P_R: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (B\<^sub>S (?\<^sub>S Y1) ,\<^sub>S (?\<^sub>S A)) ,\<^sub>S (B\<^sub>S (?\<^sub>S B) ,\<^sub>S (?\<^sub>S Y2)))) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (B\<^sub>S (?\<^sub>S Y1) ,\<^sub>S (?\<^sub>S B)) ,\<^sub>S (B\<^sub>S (?\<^sub>S A) ,\<^sub>S (?\<^sub>S Y2))))"|
-I_R_L2: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S (Z\<^sub>S I) ,\<^sub>S (?\<^sub>S Y)))"|
-A_L2: "l \<turnstile>d ((B\<^sub>S (?\<^sub>S X) ,\<^sub>S (B\<^sub>S (?\<^sub>S Y) ,\<^sub>S (?\<^sub>S Z))) \<turnstile>\<^sub>S (?\<^sub>S W)) \<Longrightarrow> l \<turnstile>d ((B\<^sub>S (B\<^sub>S (?\<^sub>S X) ,\<^sub>S (?\<^sub>S Y)) ,\<^sub>S (?\<^sub>S Z)) \<turnstile>\<^sub>S (?\<^sub>S W))"|
-W_R: "l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (?\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((?\<^sub>S X) \<turnstile>\<^sub>S (B\<^sub>S ((?\<^sub>F A) \<^sub>S) ,\<^sub>S (?\<^sub>S Y)))"
+W_L: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y)"|
+P_L: "l \<turnstile>d (((X1 ,\<^sub>S A) ,\<^sub>S (B ,\<^sub>S X2)) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (((X1 ,\<^sub>S B) ,\<^sub>S (A ,\<^sub>S X2)) \<turnstile>\<^sub>S Y)"|
+I_R_R2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (Y ,\<^sub>S I))"|
+A_R2: "l \<turnstile>d (W \<turnstile>\<^sub>S (X ,\<^sub>S (Y ,\<^sub>S Z))) \<Longrightarrow> l \<turnstile>d (W \<turnstile>\<^sub>S ((X ,\<^sub>S Y) ,\<^sub>S Z))"|
+A_R: "l \<turnstile>d (W \<turnstile>\<^sub>S ((X ,\<^sub>S Y) ,\<^sub>S Z)) \<Longrightarrow> l \<turnstile>d (W \<turnstile>\<^sub>S (X ,\<^sub>S (Y ,\<^sub>S Z)))"|
+I_R_L: "l \<turnstile>d (X \<turnstile>\<^sub>S (I ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
+I_L_L2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((I ,\<^sub>S X) \<turnstile>\<^sub>S Y)"|
+I_L_R: "l \<turnstile>d ((X ,\<^sub>S I) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
+C_L: "l \<turnstile>d ((X ,\<^sub>S ((A \<^sub>S) ,\<^sub>S (A \<^sub>S))) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y)"|
+C_R: "l \<turnstile>d (X \<turnstile>\<^sub>S (((A \<^sub>S) ,\<^sub>S (A \<^sub>S)) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y))"|
+I_L_L: "l \<turnstile>d ((I ,\<^sub>S X) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
+I_R_R: "l \<turnstile>d (X \<turnstile>\<^sub>S (Y ,\<^sub>S I)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
+I_L_R2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S I) \<turnstile>\<^sub>S Y)"|
+A_L: "l \<turnstile>d (((X ,\<^sub>S Y) ,\<^sub>S Z) \<turnstile>\<^sub>S W) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (Y ,\<^sub>S Z)) \<turnstile>\<^sub>S W)"|
+P_R: "l \<turnstile>d (X \<turnstile>\<^sub>S ((Y1 ,\<^sub>S A) ,\<^sub>S (B ,\<^sub>S Y2))) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((Y1 ,\<^sub>S B) ,\<^sub>S (A ,\<^sub>S Y2)))"|
+I_R_L2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (I ,\<^sub>S Y))"|
+A_L2: "l \<turnstile>d ((X ,\<^sub>S (Y ,\<^sub>S Z)) \<turnstile>\<^sub>S W) \<Longrightarrow> l \<turnstile>d (((X ,\<^sub>S Y) ,\<^sub>S Z) \<turnstile>\<^sub>S W)"|
+W_R: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y))"
 | 
 Prem: "(Premise seq) \<in> set l \<Longrightarrow> (\<lambda>x. seq = x) seq \<Longrightarrow> l \<turnstile>d seq"|
 Partial: "(Part struct) \<in> set l \<Longrightarrow> (\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \<or> struct = rhs )) seq \<Longrightarrow> l \<turnstile>d seq"|
-Id: "l \<turnstile>d (((?\<^sub>F f) \<^sub>S) \<turnstile>\<^sub>S ((?\<^sub>F f) \<^sub>S))"
+Id: "l \<turnstile>d ((f \<^sub>S) \<turnstile>\<^sub>S (f \<^sub>S))"
 (*calc_structure_rules_se-END*)
 
 end
