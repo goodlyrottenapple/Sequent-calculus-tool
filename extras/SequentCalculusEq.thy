@@ -15,7 +15,6 @@ fun sequentCalc_SE_to_sequentCalculus :: "Sequent \<Rightarrow> sequent" (">> _"
 
 fun formula_list_to_structure :: "Formula list \<Rightarrow> Structure" where
 "formula_list_to_structure [] = I"|
-(*"formula_list_to_structure [x] = (x \<^sub>S)"|*)
 "formula_list_to_structure (x#xs) = Structure_Comma (x \<^sub>S) (formula_list_to_structure xs)"
 
 
@@ -106,8 +105,8 @@ apply(auto intro:derivable'.intros)
 using P_L' apply simp
 using SequentCalculus.concat_def apply(auto intro:derivable'.intros)
 using derivable'.C_L apply auto[1]
-using P_R' apply simp
-done
+using P_R' by simp
+
 
 lemma formula_list_to_structure_der_P_L': 
   assumes "loc \<turnstile>d A ,\<^sub>S formula_list_to_structure ([X] ; Y) \<turnstile>\<^sub>S Z" 
