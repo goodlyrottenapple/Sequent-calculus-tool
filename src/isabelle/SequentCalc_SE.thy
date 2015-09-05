@@ -44,7 +44,7 @@ fun pairs :: "'a list \<Rightarrow> 'b list \<Rightarrow> ('a \<times> 'b) list"
 
 (*calc_structure_rules_se-BEGIN*)
 inductive derivable :: "Locale list \<Rightarrow> Sequent \<Rightarrow> bool"  (infix "\<turnstile>d" 300) where
-SingleCut: "(CutFormula f) \<in> set l \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S W) \<turnstile>\<^sub>S (Z ,\<^sub>S Y))"
+SingleCut: "(CutFormula f) \<in> set l \<Longrightarrow> l \<turnstile>d (((f \<^sub>S) ,\<^sub>S W) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (Z ,\<^sub>S (f \<^sub>S))) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S W) \<turnstile>\<^sub>S (Z ,\<^sub>S Y))"
 | 
 Not_L: "l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S ((\<not>\<^sub>F A) \<^sub>S)) \<turnstile>\<^sub>S Y)"|
 And_L_1: "l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Z) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S ((A \<and>\<^sub>F B) \<^sub>S)) \<turnstile>\<^sub>S Z)"|
