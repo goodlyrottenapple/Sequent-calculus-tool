@@ -57,7 +57,7 @@ And_R: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((B \<^sub>S) ,\<^sub>S W)) \<Lo
 Or_R_2: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((B \<^sub>S) ,\<^sub>S X)) \<Longrightarrow> l \<turnstile>d (Z \<turnstile>\<^sub>S (((A \<or>\<^sub>F B) \<^sub>S) ,\<^sub>S X))"|
 Or_R_1: "l \<turnstile>d (Z \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S X)) \<Longrightarrow> l \<turnstile>d (Z \<turnstile>\<^sub>S (((A \<or>\<^sub>F B) \<^sub>S) ,\<^sub>S X))"
 | 
-W_L: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y)"|
+W_L: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S A) \<turnstile>\<^sub>S Y)"|
 P_L: "l \<turnstile>d (((X1 ,\<^sub>S A) ,\<^sub>S (B ,\<^sub>S X2)) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (((X1 ,\<^sub>S B) ,\<^sub>S (A ,\<^sub>S X2)) \<turnstile>\<^sub>S Y)"|
 I_R_R2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (Y ,\<^sub>S I))"|
 A_R2: "l \<turnstile>d (W \<turnstile>\<^sub>S (X ,\<^sub>S (Y ,\<^sub>S Z))) \<Longrightarrow> l \<turnstile>d (W \<turnstile>\<^sub>S ((X ,\<^sub>S Y) ,\<^sub>S Z))"|
@@ -65,8 +65,8 @@ A_R: "l \<turnstile>d (W \<turnstile>\<^sub>S ((X ,\<^sub>S Y) ,\<^sub>S Z)) \<L
 I_R_L: "l \<turnstile>d (X \<turnstile>\<^sub>S (I ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
 I_L_L2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((I ,\<^sub>S X) \<turnstile>\<^sub>S Y)"|
 I_L_R: "l \<turnstile>d ((X ,\<^sub>S I) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
-C_L: "l \<turnstile>d ((X ,\<^sub>S ((A \<^sub>S) ,\<^sub>S (A \<^sub>S))) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S (A \<^sub>S)) \<turnstile>\<^sub>S Y)"|
-C_R: "l \<turnstile>d (X \<turnstile>\<^sub>S (((A \<^sub>S) ,\<^sub>S (A \<^sub>S)) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y))"|
+C_L: "l \<turnstile>d ((X ,\<^sub>S (A ,\<^sub>S A)) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S A) \<turnstile>\<^sub>S Y)"|
+C_R: "l \<turnstile>d (X \<turnstile>\<^sub>S ((A ,\<^sub>S A) ,\<^sub>S Y)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (A ,\<^sub>S Y))"|
 I_L_L: "l \<turnstile>d ((I ,\<^sub>S X) \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
 I_R_R: "l \<turnstile>d (X \<turnstile>\<^sub>S (Y ,\<^sub>S I)) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S Y)"|
 I_L_R2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d ((X ,\<^sub>S I) \<turnstile>\<^sub>S Y)"|
@@ -74,7 +74,7 @@ A_L: "l \<turnstile>d (((X ,\<^sub>S Y) ,\<^sub>S Z) \<turnstile>\<^sub>S W) \<L
 P_R: "l \<turnstile>d (X \<turnstile>\<^sub>S ((Y1 ,\<^sub>S A) ,\<^sub>S (B ,\<^sub>S Y2))) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((Y1 ,\<^sub>S B) ,\<^sub>S (A ,\<^sub>S Y2)))"|
 I_R_L2: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (I ,\<^sub>S Y))"|
 A_L2: "l \<turnstile>d ((X ,\<^sub>S (Y ,\<^sub>S Z)) \<turnstile>\<^sub>S W) \<Longrightarrow> l \<turnstile>d (((X ,\<^sub>S Y) ,\<^sub>S Z) \<turnstile>\<^sub>S W)"|
-W_R: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S ((A \<^sub>S) ,\<^sub>S Y))"
+W_R: "l \<turnstile>d (X \<turnstile>\<^sub>S Y) \<Longrightarrow> l \<turnstile>d (X \<turnstile>\<^sub>S (A ,\<^sub>S Y))"
 | 
 Prem: "(Premise seq) \<in> set l \<Longrightarrow> (\<lambda>x. seq = x) seq \<Longrightarrow> l \<turnstile>d seq"|
 Partial: "(Part struct) \<in> set l \<Longrightarrow> (\<lambda>x. (case x of Sequent lhs rhs => struct = lhs \<or> struct = rhs )) seq \<Longrightarrow> l \<turnstile>d seq"|

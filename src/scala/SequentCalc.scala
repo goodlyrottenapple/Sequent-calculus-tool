@@ -1150,7 +1150,7 @@ def ruleRuleStruct(x: Locale, xa1: RuleStruct): ruleder = (x, xa1) match {
   case (x, W_L()) =>
     ruledera(Sequenta(Structure_Bin(Structure_Freevar(List('X')),
                                      Structure_Comma(),
-                                     Structure_Formula(Formula_Freevar(List('A')))),
+                                     Structure_Freevar(List('A'))),
                        Structure_Freevar(List('Y'))),
               (_: Sequent) =>
                 Some[List[Sequent]](List(Sequenta(Structure_Freevar(List('X')),
@@ -1227,23 +1227,23 @@ Structure_Comma(), Structure_Freevar(List('Y'))),
   case (x, C_L()) =>
     ruledera(Sequenta(Structure_Bin(Structure_Freevar(List('X')),
                                      Structure_Comma(),
-                                     Structure_Formula(Formula_Freevar(List('A')))),
+                                     Structure_Freevar(List('A'))),
                        Structure_Freevar(List('Y'))),
               (_: Sequent) =>
                 Some[List[Sequent]](List(Sequenta(Structure_Bin(Structure_Freevar(List('X')),
                          Structure_Comma(),
-                         Structure_Bin(Structure_Formula(Formula_Freevar(List('A'))),
-Structure_Comma(), Structure_Formula(Formula_Freevar(List('A'))))),
+                         Structure_Bin(Structure_Freevar(List('A')),
+Structure_Comma(), Structure_Freevar(List('A')))),
            Structure_Freevar(List('Y'))))))
   case (x, C_R()) =>
     ruledera(Sequenta(Structure_Freevar(List('X')),
-                       Structure_Bin(Structure_Formula(Formula_Freevar(List('A'))),
+                       Structure_Bin(Structure_Freevar(List('A')),
                                       Structure_Comma(),
                                       Structure_Freevar(List('Y')))),
               (_: Sequent) =>
                 Some[List[Sequent]](List(Sequenta(Structure_Freevar(List('X')),
-           Structure_Bin(Structure_Bin(Structure_Formula(Formula_Freevar(List('A'))),
-Structure_Comma(), Structure_Formula(Formula_Freevar(List('A')))),
+           Structure_Bin(Structure_Bin(Structure_Freevar(List('A')),
+Structure_Comma(), Structure_Freevar(List('A'))),
                           Structure_Comma(), Structure_Freevar(List('Y')))))))
   case (x, I_L_L()) =>
     ruledera(Sequenta(Structure_Freevar(List('X')),
@@ -1316,7 +1316,7 @@ Structure_Comma(), Structure_Freevar(List('Z')))),
            Structure_Freevar(List('W'))))))
   case (x, W_R()) =>
     ruledera(Sequenta(Structure_Freevar(List('X')),
-                       Structure_Bin(Structure_Formula(Formula_Freevar(List('A'))),
+                       Structure_Bin(Structure_Freevar(List('A')),
                                       Structure_Comma(),
                                       Structure_Freevar(List('Y')))),
               (_: Sequent) =>
