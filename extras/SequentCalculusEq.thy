@@ -94,18 +94,106 @@ case (Cons a A)
   using 1 by (simp add: SequentCalculus.concat_def)
 qed
 
+
+lemma W_L': "loc \<turnstile>D X \<turnstile> Y \<Longrightarrow> loc \<turnstile>D X ; A \<turnstile> Y"
+proof (induct A arbitrary: X Y)
+case Nil 
+  thus ?case
+  by (simp add: SequentCalculus.concat_def)
+next
+case (Cons a A)
+  then have ih: "loc \<turnstile>D X ; A \<turnstile> Y" by simp
+  have subst1: "X ; (a # A) = (X; [a]) ; (A ; [])" using SequentCalculus.concat_def by simp
+  have subst2: "[a] ; [] = [a]" using SequentCalculus.concat_def by simp
+  show ?case
+  apply (subst subst1)
+  apply(rule P_L')
+  apply (subst subst2)
+  apply(rule_tac derivable'.W_L)
+  using ih by simp
+qed
+
+lemma W_R': "loc \<turnstile>D X \<turnstile> Y \<Longrightarrow> loc \<turnstile>D X \<turnstile> A ; Y"
+proof (induct A arbitrary: X Y)
+case Nil 
+  thus ?case
+  by (simp add: SequentCalculus.concat_def)
+next
+case (Cons a A)
+  then have ih: "loc \<turnstile>D X \<turnstile> A ; Y" by simp
+  have subst1: "(a # A) ; Y = [a] ; (A ; Y)" using SequentCalculus.concat_def by simp
+  show ?case
+  apply (subst subst1)
+  apply(rule_tac derivable'.W_R)
+  using ih by simp
+qed
+
+lemma C_L': "loc \<turnstile>D (X ; A) ; A \<turnstile> Y \<Longrightarrow> loc \<turnstile>D X ; A \<turnstile> Y"
+proof (induct A arbitrary: X Y)
+case Nil 
+  thus ?case
+  by (simp add: SequentCalculus.concat_def)
+next
+case (Cons a A)
+  then have "loc \<turnstile>D (X ; ([a] ; A)) ; ([a] ; A) \<turnstile> Y" using SequentCalculus.concat_def by simp
+  then have "loc \<turnstile>D ((X ; [a]) ; A) ; ([a] ; A) \<turnstile> Y" using SequentCalculus.concat_def by simp
+  then have "loc \<turnstile>D ((X ; [a]) ; [a]) ; (A ; A) \<turnstile> Y" by(rule_tac P_L')
+  then have "loc \<turnstile>D (((X ; [a]) ; [a]) ; A) ; A \<turnstile> Y" using SequentCalculus.concat_def by simp
+  with Cons(1) have ih: "loc \<turnstile>D ((X ; [a]) ; [a]) ; A \<turnstile> Y" by simp
+  
+  have subst1: "X ; (a # A) = (X ; [a]) ; (A ; [])" using SequentCalculus.concat_def by simp
+  have subst2: "[a] ; [] = [a]" using SequentCalculus.concat_def by simp
+  have subst3: "((X ; A) ; [a]) ; [a] = (X ; A) ; (([a] ; [a]) ;[])" using SequentCalculus.concat_def by simp
+  show ?case
+  apply(subst subst1)
+  apply(rule P_L')
+  apply(subst subst2)
+  apply(rule_tac derivable'.C_L)
+  apply(subst subst3)
+  apply(rule P_L')
+  using ih SequentCalculus.concat_def by simp
+qed
+
+lemma C_R': "loc \<turnstile>D X  \<turnstile> (A ; A) ;  Y \<Longrightarrow> loc \<turnstile>D X  \<turnstile> A ; Y"
+proof (induct A arbitrary: X Y)
+case Nil 
+  thus ?case
+  by (simp add: SequentCalculus.concat_def)
+next
+case (Cons a A)
+  then have "loc \<turnstile>D X \<turnstile> (([a] ; A) ; ([a] ; A)) ; Y" using SequentCalculus.concat_def by simp
+  then have "loc \<turnstile>D X \<turnstile> ([a] ; A) ; ([a] ; (A ; Y))" using SequentCalculus.concat_def by simp
+  then have "loc \<turnstile>D X \<turnstile> ([a] ; [a]) ; (A ; (A ; Y))" by (rule_tac P_R')
+  then have "loc \<turnstile>D X \<turnstile> ([]; ([a] ; [a])) ; ((A ; A) ; Y)" using SequentCalculus.concat_def by simp
+  then have "loc \<turnstile>D X \<turnstile> ([] ; (A ; A)) ; (([a] ; [a]) ; Y)" using P_R' by simp
+  then have "loc \<turnstile>D X \<turnstile> (A ; A) ; (([a] ; [a]) ; Y)" using SequentCalculus.concat_def by simp
+  with Cons(1) have ih: "loc \<turnstile>D X \<turnstile> A ; (([a] ; [a]) ; Y)" by simp
+  
+  have subst1: "(a # A) ; Y = [a] ; (A ; Y)" using SequentCalculus.concat_def by simp
+  have subst2: "([a] ; [a]) = [] ; ([a] ; [a])" using SequentCalculus.concat_def by simp
+  show ?case
+  apply(subst subst1)
+  apply(rule_tac derivable'.C_R)
+  apply(subst subst2)
+  apply(rule P_R')
+  using ih SequentCalculus.concat_def by simp
+qed
+
 lemma sequentCalc_SE_to_sequentCalculus_derivable:
 fixes loc f
 assumes "loc \<turnstile>d seq"
   and "loc = [CutFormula f]"
   shows "[f] \<turnstile>D (>> seq)"
 using assms apply (induct loc seq)
-unfolding sequentCalc_SE_to_sequentCalculus.simps structure_to_formula_list.simps
+using sequentCalc_SE_to_sequentCalculus.simps structure_to_formula_list.simps
 apply(auto intro:derivable'.intros)
+using W_L' apply simp
 using P_L' apply simp
 using SequentCalculus.concat_def apply(auto intro:derivable'.intros)
-using derivable'.C_L apply auto[1]
-using P_R' by simp
+using SequentCalculus.concat_def C_L' apply (metis append_assoc)
+using SequentCalculus.concat_def C_R' apply simp
+using SequentCalculus.concat_def P_R' apply simp
+using SequentCalculus.concat_def W_R' by simp
 
 
 lemma formula_list_to_structure_der_P_L': 
