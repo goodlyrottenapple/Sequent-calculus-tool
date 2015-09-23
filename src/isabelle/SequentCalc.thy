@@ -48,6 +48,7 @@ datatype Rule = RuleCut RuleCut
      and Prooftree = Prooftree Sequent Rule "Prooftree list" ("_ \<Longleftarrow> PT ( _ ) _" [341,341] 350)
 (*calc_structure_rules-END*)
 
+(*This function simply returns the sequent at the root of a proof tree *)
 fun concl :: "Prooftree \<Rightarrow> Sequent" where
 "concl (a \<Longleftarrow> PT ( b ) c) = a"
 
@@ -56,17 +57,23 @@ datatype ruleder = ruleder      Sequent "Sequent \<Rightarrow> Sequent list opti
 
 
 (*(*uncommentL?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)
+(*This function is an auxillary function which tries to unwrap any Structure_Action_Structure constructors and 
+will return an Atprop if the structure contains no other constructors otherwise it will return None*)
 fun is_act_mod :: "Structure \<Rightarrow> Atprop option" where
 "is_act_mod (Structure_Formula (Formula_Atprop p)) = Some p"|
 "is_act_mod (Structure_Action_Structure _ _ s) = is_act_mod s"|
 "is_act_mod _ = None"
 
+(*The atom function is used by the atom rule. to check that the sequent is of a certain form.*)
 fun atom :: "Sequent \<Rightarrow> bool" where
 "atom (l \<turnstile>\<^sub>S r) = ( (is_act_mod l) \<noteq> None \<and> (is_act_mod l) = (is_act_mod r) )"|
 "atom _ = False"
 (*uncommentR?Atprop?Formula?Formula_Atprop?Formula_Action_Formula*)*)
 
 (*(*uncommentL?Action?Action_Freevar?Agent?Agent_Freevar?Formula_Action?Formula_Agent?Sequent_Structure?Sequent*)
+(*relAKACheck takes in a an action structure and a list deconstructed parts of a sequent and checks
+whether the list contains an Action alpha, Agent a and Action beta that are in the action structure*)
+
 fun relAKACheck :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> ((Sequent \<times> Sequent) list) \<Rightarrow> bool" where
 "relAKACheck fun mlist = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) mlist of 
                    Some (_, Sequent_Structure (Formula_Action alpha \<^sub>S)) \<Rightarrow> 
@@ -78,19 +85,12 @@ fun relAKACheck :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> ((
                        | _ \<Rightarrow> False)
                  | _ \<Rightarrow> False)"
 
-fun betaList :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> ((Sequent \<times> Sequent) list) \<Rightarrow> (Action list)" where
-"betaList fun mlist = (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure (Formula_Action (?\<^sub>Act ''alpha'') \<^sub>S) ) mlist of 
-                   Some (_, Sequent_Structure (Formula_Action alpha \<^sub>S)) \<Rightarrow> 
-                      (case List.find ( \<lambda>(x::Sequent \<times> Sequent). fst x = Sequent_Structure(Structure_Formula(Formula_Agent(Agent_Freevar ''a''))) ) mlist of 
-                         Some (_, Sequent_Structure (Formula_Agent a \<^sub>S)) \<Rightarrow> fun alpha a
-                       | _ \<Rightarrow> [])
-                 | _ \<Rightarrow> [])"
-
 fun swapin :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> bool" where
 "swapin fun m s = relAKACheck fun (match m s)"
 (*uncommentR?Action?Action_Freevar?Agent?Agent_Freevar?Formula_Action?Formula_Agent?Sequent_Structure?Sequent*)*)
 
 (*(*uncommentL?Structure_Bigcomma*)
+(* These are custom rules for the bigcomma *)
 fun bigcomma_cons_L :: "Sequent \<Rightarrow> Sequent list option" where
 "bigcomma_cons_L ( (B\<^sub>S X (;\<^sub>S) (;;\<^sub>S Xs)) \<turnstile>\<^sub>S Y ) = Some [(;;\<^sub>S (X#Xs) \<turnstile>\<^sub>S Y)]"|
 "bigcomma_cons_L _ = None"
@@ -109,30 +109,8 @@ fun bigcomma_cons_R2 :: "Sequent \<Rightarrow> Sequent list option" where
 "bigcomma_cons_R2 _ = None"
 (*uncommentR?Structure_Bigcomma*)*)
 
-(*
-value"replaceAll (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#(match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')) X))) (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))"
-value"(AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (ActS\<^sub>S (forwA\<^sub>S) (Action ''beta'') (((Atprop ''X'') \<^sub>F) \<^sub>S)))"
-value"match (ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X''))) (ActS\<^sub>S (forwA\<^sub>S) (Action ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''a'') (((Atprop ''X'') \<^sub>F) \<^sub>S)))"
-value"(ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''alpha'') (AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))"
-*)
 
 (*(*uncommentL?RuleSwapout*)
-fun swapout_L_aux :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_L_aux relAKA [] seq ( X \<turnstile>\<^sub>S ;;\<^sub>S [] ) = Some []" |
-"swapout_L_aux relAKA (b#list) seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) = (
-  case ( swapout_L_aux relAKA list seq ( X \<turnstile>\<^sub>S ;;\<^sub>S Ys ) ) of (Some list) \<Rightarrow> 
-    (case (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X)))) of mlist \<Rightarrow>
-      (case (replaceAll mlist seq) of applied \<Rightarrow>
-        (if (relAKACheck relAKA (List.union (match seq applied) mlist) ) then 
-        Some (applied#list) else None)))
-| None \<Rightarrow> None)"|
-"swapout_L_aux relAKA _ _ _ = None"
-
-fun swapout_L :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_L relAKA seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) = 
-    swapout_L_aux relAKA (betaList relAKA (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))) seq ( X \<turnstile>\<^sub>S ;;\<^sub>S ((Y::Structure) # Ys) ) " |
-"swapout_L _ _ _ = None"
-
 fun swapout_L' :: "Action list \<Rightarrow> Action \<Rightarrow> Agent \<Rightarrow> Structure \<Rightarrow> Structure list \<Rightarrow> Sequent list option" where
 "swapout_L' [] alpha a X [] = Some ([])" |
 "swapout_L' (beta#actionList) alpha a X [] = None" |
@@ -140,27 +118,20 @@ fun swapout_L' :: "Action list \<Rightarrow> Action \<Rightarrow> Agent \<Righta
 "swapout_L' (beta#actionList) alpha a X (Y # Ys) = (case swapout_L' actionList alpha a X Ys of 
    Some list \<Rightarrow> Some ((AgS\<^sub>S forwK\<^sub>S a ActS\<^sub>S forwA\<^sub>S beta X \<turnstile>\<^sub>S Y) #list) | None \<Rightarrow> None )"
 
-fun swapout_L'' :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_L'' relAKA ( ActS\<^sub>S forwA\<^sub>S alpha (AgS\<^sub>S forwK\<^sub>S a X ) \<turnstile>\<^sub>S ;;\<^sub>S list ) = swapout_L' (relAKA alpha a) alpha a X list" |
-"swapout_L'' _ _ = None"
+fun swapout_L :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
+"swapout_L relAKA ( ActS\<^sub>S forwA\<^sub>S alpha (AgS\<^sub>S forwK\<^sub>S a X ) \<turnstile>\<^sub>S ;;\<^sub>S list ) = swapout_L' (relAKA alpha a) alpha a X list" |
+"swapout_L _ _ = None"
 
+fun swapout_R' :: "Action list \<Rightarrow> Action \<Rightarrow> Agent \<Rightarrow> Structure \<Rightarrow> Structure list \<Rightarrow> Sequent list option" where
+"swapout_R' [] alpha a X [] = Some ([])" |
+"swapout_R' (beta#actionList) alpha a X [] = None" |
+"swapout_R' [] alpha a X (Y # Ys) = None" |
+"swapout_R' (beta#actionList) alpha a X (Y # Ys) = (case swapout_R' actionList alpha a X Ys of 
+   Some list \<Rightarrow> Some ((Y \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S a ActS\<^sub>S forwA\<^sub>S beta X) #list) | None \<Rightarrow> None )"
 
-fun swapout_R_aux :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> (Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_R_aux relAKA [] seq ( ;;\<^sub>S [] \<turnstile>\<^sub>S X ) = Some []" |
-"swapout_R_aux relAKA (b#list) seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) = (
-  case ( swapout_R_aux relAKA list seq ( ;;\<^sub>S Ys \<turnstile>\<^sub>S X ) ) of (Some list) \<Rightarrow> 
-    (case (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X)))) of mlist \<Rightarrow>
-      (case (replaceAll mlist seq) of applied \<Rightarrow>
-        (if (relAKACheck relAKA (List.union (match seq applied) mlist) ) then 
-        Some (applied#list) else None)))
-| None \<Rightarrow> None)"|
-"swapout_R_aux _ _ _ _ = None"
-
-
-fun swapout_R :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
-"swapout_R relAKA seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) = 
-    swapout_R_aux relAKA (betaList relAKA (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))) seq ( ;;\<^sub>S ((Y::Structure) # Ys) \<turnstile>\<^sub>S X ) " |
-"swapout_R _ _ _ = None"
+fun swapout_R :: "(Action \<Rightarrow> Agent => Action list) \<Rightarrow> Sequent \<Rightarrow> Sequent list option" where
+"swapout_R relAKA ( ;;\<^sub>S list \<turnstile>\<^sub>S ActS\<^sub>S forwA\<^sub>S alpha (AgS\<^sub>S forwK\<^sub>S a X ) ) = swapout_R' (relAKA alpha a) alpha a X list" |
+"swapout_R _ _ = None"
 (*uncommentR?RuleSwapout*)*)
 
 
@@ -175,28 +146,6 @@ fun pre_r :: "Action \<Rightarrow> Sequent \<Rightarrow> bool" where
 "pre_r a (X \<turnstile>\<^sub>S (One\<^sub>F alpha)\<^sub>S) = (a = alpha)"|
 "pre_r a _ = False"
 (*uncommentR?Pre_R*)*)
-
-(*
-fun relAKAA :: "Action \<Rightarrow> Agent \<Rightarrow> Action \<Rightarrow> bool" where
-"relAKAA (Action x) (Agent a) (Action y) = ((x = y) \<or> (x=''ep'' \<and> a = ''c'' \<and> y=''ew''))" |
-"relAKAA _ _ _ = False"
-
-definition "const_seq = ((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))"
-definition "seq_empty = ((;;\<^sub>S []) \<turnstile>\<^sub>S (ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S))))"
-definition "seq = ((;;\<^sub>S [((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S)]) \<turnstile>\<^sub>S (ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S))))"
-definition "seqO = (((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S) \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (Agent ''c'') ActS\<^sub>S forwA\<^sub>S (Action ''epa'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S) )"
-
-definition "mtchList X b Y= (map (\<lambda>(x,y). (Sequent_Structure x, Sequent_Structure y)) (((Formula_Action (?\<^sub>Act ''beta'') \<^sub>S, Formula_Action b \<^sub>S)#((?\<^sub>S ''Y''), Y)# (match ((ActS\<^sub>S (forwA\<^sub>S) (?\<^sub>Act ''alpha'') (AgS\<^sub>S (forwK\<^sub>S) (?\<^sub>Ag ''a'') (?\<^sub>S ''X'')))) X))))"
-
-definition "mList = mtchList ((ActS\<^sub>S (forwA\<^sub>S) (Action ''epa'') (AgS\<^sub>S (forwK\<^sub>S) (Agent ''c'') (((Atprop ''Ga'') \<^sub>F) \<^sub>S)))) (Action(''epa'')) ((AgF\<^sub>F (fboxK\<^sub>F) (Agent ''c'') (B\<^sub>F (Pre\<^sub>F (Action ''epa'')) (\<rightarrow>\<^sub>F) ((Atprop ''Ga'') \<^sub>F))) \<^sub>S)"
-value " match (((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))) seqO "
-value "relAKACheck relAKAA (List.union (match (((?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X''))) seqO) mList)"
-value "swapout_R relAKAA [] const_seq seq_empty"
-value "swapout_R relAKAA [Action(''epa'')] const_seq seq"
-
-
-value"swapout_L rel blist ( (?\<^sub>S ''Y'') \<turnstile>\<^sub>S AgS\<^sub>S forwK\<^sub>S (?\<^sub>Ag ''a'') ActS\<^sub>S forwA\<^sub>S (?\<^sub>Act ''beta'') (?\<^sub>S ''X'') )"
-*)
 
 
 datatype Locale = (*(*uncommentL?Formula?RuleCut-BEGIN*)*)(*uncommentL?Formula?RuleCut-END*)
@@ -290,16 +239,6 @@ where
                   else (Fail, []) )"
 
 
-(*(*uncommentL?RuleCut-BEGIN*)*)(*uncommentL?RuleCut-END*)
-(*der cut applies a supplied formula if the cut rule is used - a bit hacky atm *) 
-(*fun der_cut :: "Rule \<Rightarrow> Formula \<Rightarrow> Sequent \<Rightarrow> (Rule * Sequent list)"
-where
-"der_cut (RuleCut RuleCut.SingleCut) cutForm s = (if (ruleMatch (fst (rule (RuleCut RuleCut.SingleCut))) s) 
-   then ((RuleCut RuleCut.SingleCut), map (replaceAll (match (fst (rule (RuleCut RuleCut.SingleCut))) s @ (map (\<lambda>(x,y). (Sequent_Structure (Structure_Formula x), Sequent_Structure (Structure_Formula y))) (match (?\<^sub>F''A'') cutForm))) ) (snd (rule (RuleCut RuleCut.SingleCut)))) 
-   else (Fail, []))" |
-"der_cut _ _ _ = (Fail, [])"*)
-(*uncommentR?RuleCut-BEGIN*)(*(*uncommentR?RuleCut-END*)*)
-
 primrec ant :: "Sequent \<Rightarrow> Structure" where
 "ant (Sequent x y) = x" |
 "ant (Sequent_Structure x) = x"
@@ -307,17 +246,8 @@ primrec consq :: "Sequent \<Rightarrow> Structure" where
 "consq (Sequent x y) = y"|
 "consq (Sequent_Structure x) = x"
 
-fun replaceIntoPT_aux :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree \<Rightarrow> Prooftree" and 
-  replaceIntoPT_list :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree list \<Rightarrow> Prooftree list" where 
-"replaceIntoPT_aux list (Prooftree c (RuleMacro s pt) ptlist) = Prooftree (replaceAll list c) (RuleMacro s (replaceIntoPT_aux list pt)) (replaceIntoPT_list list ptlist)" |
-"replaceIntoPT_aux list (Prooftree c r ptlist) = Prooftree (replaceAll list c) r (replaceIntoPT_list list ptlist)" |
-"replaceIntoPT_list list [] = []" |
-"replaceIntoPT_list list (l#ist) = (replaceIntoPT_aux list l)#(replaceIntoPT_list list ist)"
 
-fun replaceIntoPT :: "Sequent \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
-"replaceIntoPT seq (Prooftree c r ptlist) = replaceIntoPT_aux (match c seq) (Prooftree c r ptlist)"
-
-
+(*collectPremises returns all the leaves of a prooftree where the Prem rule has been applied *)
 fun collectPremises :: "Prooftree \<Rightarrow> Sequent list" where
 "collectPremises (Prooftree p (RuleZer Prem) []) = [p]" |
 "collectPremises (Prooftree _ (RuleMacro _ pt) list) = foldr append (map collectPremises list) []" |
@@ -325,6 +255,9 @@ fun collectPremises :: "Prooftree \<Rightarrow> Sequent list" where
 
 fun collectPremisesToLocale :: "Prooftree \<Rightarrow> Locale list" where
 "collectPremisesToLocale pt = map Premise (collectPremises pt)"
+
+(*collectCutFormulas returns all cut formulas used in a prooftree,
+by checking for a matching branch on the left and the right hand side of the turnstyle of the two leaves *)
 
 fun collectCutFormulas :: "Prooftree \<Rightarrow> Formula list" where
 "collectCutFormulas (Prooftree _ (RuleCut _) [l, r]) = (
@@ -369,77 +302,16 @@ fun isProofTreeWithCut :: "Locale list \<Rightarrow> Prooftree \<Rightarrow> boo
 "isProofTreeWithCut loc pt = isProofTree (append loc (collectCutFormulasToLocale pt)) pt"
 
 
-(*"isProofTree loc (s \<Longleftarrow> B(r) l) = ( foldr (op \<and>) (map (isProofTree loc) l) True \<and> set (Product_Type.snd (der r s)) = set (map concl l) )"*)
-
-(*
-fun isProofTreeWCut :: "Prooftree \<Rightarrow> bool" where
-"isProofTreeWCut (s \<Longleftarrow> C(f) t1 ; t2) = (isProofTreeWCut t1 \<and> isProofTreeWCut t2 \<and> (case (der_cut (RuleCut RuleCut.SingleCut) f s) of (Fail, []) \<Rightarrow> False | (ru,[se1, se2]) \<Rightarrow> (se1 = concl t1 \<and> se2 = concl t2) \<or> (se1 = concl t2 \<and> se2 = concl t1)))" |
-"isProofTreeWCut (s \<Longleftarrow> Z(r)) = ruleMatch (fst (rule (RuleZer r))) s" | 
-"isProofTreeWCut (s \<Longleftarrow> U(r) t) = (isProofTreeWCut t \<and> (case (der (RuleU r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTreeWCut (s \<Longleftarrow> D(r) t) = (isProofTreeWCut t \<and> (case (der (RuleDisp r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTreeWCut (s \<Longleftarrow> O(r) t) = (isProofTreeWCut t \<and> (case (der (RuleOp r) s) of (Fail, []) \<Rightarrow> False | (ru,[se]) \<Rightarrow> se = concl t))" |
-"isProofTreeWCut (s \<Longleftarrow> B(r) t1 ; t2) = (isProofTreeWCut t1 \<and> isProofTreeWCut t2 \<and> (case (der (RuleBin r) s) of (Fail, []) \<Rightarrow> False | (ru,[se1, se2]) \<Rightarrow> (se1 = concl t1 \<and> se2 = concl t2) \<or> (se1 = concl t2 \<and> se2 = concl t1)))"
-
-lemma isProofTree_concl_freevars[simp]:
-  fixes pt
-  assumes "isProofTree pt"
-  shows "freevars (concl pt) = {}"
-proof (cases pt)
-case (Zer s r)
-  from assms have 1: "ruleMatch (fst (rule (RuleZer r))) s" by (metis (poly_guards_query) Zer isProofTree.simps(1))
-  have free: "freevars s = {}" by (metis "1" ruleMatch_def)
-  thus ?thesis by (metis Zer concl.simps)
-next
-case (Unary s r t)
-  with assms  have "(der (RuleU r) s) \<noteq> (Fail, [])" by fastforce
-  then have 1: "ruleMatch (fst (rule (RuleU r))) s" by (metis der.simps)
-  have free: "freevars s = {}" by (metis "1" ruleMatch_def)
-  thus ?thesis by (metis Unary concl.simps)
-next
-case (Display s r t)
-  with assms  have "(der (RuleDisp r) s) \<noteq> (Fail, [])" by fastforce
-  then have 1: "ruleMatch (fst (rule (RuleDisp r))) s" by (metis der.simps)
-  have free: "freevars s = {}" by (metis "1" ruleMatch_def)
-  thus ?thesis by (metis Display concl.simps)
-next
-case (Operational s r t)
-  with assms  have "(der (RuleOp r) s) \<noteq> (Fail, [])" by fastforce
-  then have 1: "ruleMatch (fst (rule (RuleOp r))) s" by (metis der.simps)
-  have free: "freevars s = {}" by (metis "1" ruleMatch_def)
-  thus ?thesis by (metis Operational concl.simps(4))
-next
-case (Binary s r t1 t2)
-  with assms  have "(der (RuleBin r) s) \<noteq> (Fail, [])" by fastforce
-  then have 1: "ruleMatch (fst (rule (RuleBin r))) s" by (metis der.simps)
-  have free: "freevars s = {}" by (metis "1" ruleMatch_def)
-  thus ?thesis by (metis Binary concl.simps)
-next
-case (Cut s r t1 t2)
-  then have False by (metis assms isProofTree.simps)
-  thus ?thesis ..
-qed
-*)
-(*
-- equality of shallow and deep terms
-  - for every deep-term with a valid proof tree there is an equivalent shallow-term in the set derivable
-  - shallow\<Rightarrow>deep possible induction proof on the rules of the shallow embedding set*)
-
 definition "ruleList = (*rules_rule_list-BEGIN*)(map (RuleCut) [SingleCut]) @ (map (RuleL) [Not_L,And_L_1,And_L_2,ImpR_R,Or_L,Not_R,ImpR_L,And_R,Or_R_2,Or_R_1]) @ (map (RuleStruct) [W_L,P_L,I_R_R2,A_R2,A_R,I_R_L,I_L_L2,I_L_R,C_L,C_R,I_L_L,I_R_R,I_L_R2,A_L,P_R,I_R_L2,A_L2,W_R]) @ (map (RuleZer) [Prem,Partial,Id])(*rules_rule_list-END*)"
 
 lemma Atprop_without_Freevar[simp]: "\<And>a. freevars a = {} \<Longrightarrow> \<exists>q. a = Atprop q"
   by (metis Atprop.exhaust freevars_Atprop.simps(1) insert_not_empty)
 
-(*
-(*perhaps things bellow should be moved to a separate utils file?? *)
 
-fun replaceLPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
-"replaceLPT (s \<Longleftarrow> B(r) t1 ; t2) rep = (s \<Longleftarrow> B(r) rep ; t2)" |
-"replaceLPT pt rep = pt"
-
-fun replaceRPT :: "Prooftree \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
-"replaceRPT (s \<Longleftarrow> B(r) t1 ; t2) rep = (s \<Longleftarrow> B(r) t1 ; rep)" |
-"replaceRPT pt rep = pt"
-*)
+(* The rulify_ definitions are used for creating macros in the UI,
+by turning a proof tree of concrete terms into a proof tree containing free variables.
+This is done by converting every leaf of a Sequent into a Freevar term of the highest level of that term 
+(i.e. if a sequent contains an atprop it it will be turned into a sequent freevar). *)
 
 (*(*uncommentL?Agent?Agent_Freevar*)
 primrec rulifyAgent :: "Agent \<Rightarrow> Agent" where
@@ -460,6 +332,10 @@ fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
 (if CHR ''A'' \<le> f \<and> f \<le> CHR ''Z'' then (Formula_Freevar (f#a)) else (Formula_Atprop (Atprop_Freevar (f#a)))
 )" |
 (*uncommentR?Formula_Atprop-BEGIN*)(*(*uncommentR?Formula_Atprop-END*)*)
+(*(*uncommentL?Formula_Un-BEGIN*)*)(*uncommentL?Formula_Un-END*)
+"rulifyFormula (Formula_Un c y) = (Formula_Un c (rulifyFormula y))" |
+(*uncommentR?Formula_Un-BEGIN*)(*(*uncommentR?Formula_Un-END*)*)
+(*uncommentR?Formula_Bin-BEGIN*)(*(*uncommentR?Formula_Bin-END*)*)
 (*(*uncommentL?Formula_Bin-BEGIN*)*)(*uncommentL?Formula_Bin-END*)
 "rulifyFormula (Formula_Bin x c y) = (Formula_Bin (rulifyFormula x) c (rulifyFormula y))" |
 (*uncommentR?Formula_Bin-BEGIN*)(*(*uncommentR?Formula_Bin-END*)*)
@@ -476,6 +352,9 @@ fun rulifyFormula :: "Formula \<Rightarrow> Formula" where
 (*uncommentR?Formula-BEGIN*)(*(*uncommentR?Formula-END*)*)
 
 (*(*uncommentL?Structure-BEGIN*)*)(*uncommentL?Structure-END*)
+(*if the leaf is a formula with a name beginning with 'F', 
+the term will be turned into a Formula_Freevar, else it will become a Structure_Freevar*)
+
 fun rulifyStructure :: "Structure \<Rightarrow> Structure" where
 (*(*uncommentL?Structure_Formula?Formula_Atprop-BEGIN*)*)(*uncommentL?Structure_Formula?Formula_Atprop-END*)
 "rulifyStructure (Structure_Formula (Formula_Atprop(Atprop (f#a)))) = 
@@ -516,16 +395,32 @@ fun rulifyProoftree :: "Prooftree \<Rightarrow> Prooftree" where
 "rulifyProoftree (Prooftree s r list) = (Prooftree (rulifySequent s) r (map rulifyProoftree list))"
 
 
-fun replaceIntoProoftree :: "Prooftree list \<Rightarrow> Prooftree \<Rightarrow> Prooftree"  where
-"replaceIntoProoftree [] (Prooftree s (RuleZer Prem) []) = (Prooftree s (RuleZer Prem) [])" |
-"replaceIntoProoftree (l#ist) (Prooftree s (RuleZer Prem) []) = (if (concl l) = s then l else replaceIntoProoftree ist (Prooftree s (RuleZer Prem) []))" |
-"replaceIntoProoftree list (Prooftree s r []) =  (Prooftree s r [])" |
-"replaceIntoProoftree list (Prooftree s r l) =  (Prooftree s r (map (replaceIntoProoftree list) l))"
+(*This function is used to replace any freevar terms in a sequent by a given term, but does this throughout a whole prooftree.
+The function is used when applying a macro, where the freevars are substituted by concrete terms of the sequent that the macro is being used on *)
+
+fun replaceSequentIntoPT_aux :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree \<Rightarrow> Prooftree" and 
+  replaceSequentIntoPT_list :: "(Sequent \<times> Sequent) list \<Rightarrow> Prooftree list \<Rightarrow> Prooftree list" where 
+"replaceSequentIntoPT_aux list (Prooftree c (RuleMacro s pt) ptlist) = Prooftree (replaceAll list c) (RuleMacro s (replaceSequentIntoPT_aux list pt)) (replaceSequentIntoPT_list list ptlist)" |
+"replaceSequentIntoPT_aux list (Prooftree c r ptlist) = Prooftree (replaceAll list c) r (replaceSequentIntoPT_list list ptlist)" |
+"replaceSequentIntoPT_list list [] = []" |
+"replaceSequentIntoPT_list list (l#ist) = (replaceSequentIntoPT_aux list l)#(replaceSequentIntoPT_list list ist)"
+
+fun replaceSequentIntoPT :: "Sequent \<Rightarrow> Prooftree \<Rightarrow> Prooftree" where
+"replaceSequentIntoPT seq (Prooftree c r ptlist) = replaceSequentIntoPT_aux (match c seq) (Prooftree c r ptlist)"
+
+(* The following two functions are used to turn a pt containing macros into a one which doesnt, by merging any proof trees found in RulMacro into the main pt*)
+fun replacePTIntoPT :: "Prooftree list \<Rightarrow> Prooftree \<Rightarrow> Prooftree"  where
+"replacePTIntoPT [] (Prooftree s (RuleZer Prem) []) = (Prooftree s (RuleZer Prem) [])" |
+"replacePTIntoPT (l#ist) (Prooftree s (RuleZer Prem) []) = (if (concl l) = s then l else replacePTIntoPT ist (Prooftree s (RuleZer Prem) []))" |
+"replacePTIntoPT list (Prooftree s r []) =  (Prooftree s r [])" |
+"replacePTIntoPT list (Prooftree s r l) =  (Prooftree s r (map (replacePTIntoPT list) l))"
 
 fun expandProoftree :: "Prooftree \<Rightarrow> Prooftree"  where
-"expandProoftree (Prooftree _ (RuleMacro n (Prooftree s r l)) list) = (Prooftree s r (map (replaceIntoProoftree (map expandProoftree list)) (map expandProoftree l)))" |
+"expandProoftree (Prooftree _ (RuleMacro n (Prooftree s r l)) list) = (Prooftree s r (map (replacePTIntoPT (map expandProoftree list)) (map expandProoftree l)))" |
 "expandProoftree (Prooftree s r list) = Prooftree s r (map expandProoftree list)"
 
+
+(* collect_freevars_Structure and collect_freevars_Sequent are used to analyze the shape of a rule by the is_display_rule function *)
 fun collect_freevars_Structure :: "Structure \<Rightarrow> Structure list" where
 (*(*uncommentL?Structure_Formula-BEGIN*)*)(*uncommentL?Structure_Formula-END*)  "collect_freevars_Structure (Structure_Formula f) = [Structure_Formula f]" (*uncommentR?Structure_Formula-BEGIN*)(*(*uncommentR?Structure_Formula-END*)*)
 (*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*) | "collect_freevars_Structure (Structure_Bin l _ r) = (collect_freevars_Structure l) @ (collect_freevars_Structure r)" (*uncommentR?Structure_Bin-BEGIN*)(*(*uncommentR?Structure_Bin-END*)*)
@@ -554,14 +449,8 @@ else [])"
 definition displayRules :: "Rule list" where
 "displayRules = foldr (op @) (map is_display_rule ruleList) []"
 
-value "displayRules"
 
-(*
-definition "lhs = collect_freevars_Sequent (fst (rule Empty (RuleStruct I_impL)))"
-definition "rhs = collect_freevars_Sequent (hd (the (snd (rule Empty (RuleStruct I_impL)) (fst (rule Empty (RuleStruct E_L)))  )))"
-
-value "multiset_of lhs = multiset_of rhs"
-*)
+(* The following definitions are used for the display_tac in the GUI *)
 
 datatype polarity = Plus ("+p") | Minus ("-p") | N
 
@@ -592,6 +481,7 @@ lemma polarity_weird_and_comm: "a \<and>p b = b \<and>p a"
 apply (cases a, (cases b, auto)+)
 done
 
+(*this function defines the polarity of the different structural connectives in the display calculus*)
 fun structure_Op_polarity :: "Structure_Bin_Op \<Rightarrow> (polarity \<times> polarity)" where
 (*(*uncommentL?Structure_Comma-BEGIN*)*)(*uncommentL?Structure_Comma-END*) 
    "structure_Op_polarity Structure_Comma = (+p, +p)"
@@ -621,6 +511,9 @@ fun polarity_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polarity"
 "polarity_Sequent s (Sequent lhs rhs) = (\<not>p(polarity_Structure s lhs)) \<or>p (polarity_Structure s rhs)" |
 "polarity_Sequent s _ = N"
 
+(*given a structure s we want to isolate and another structure s', where s is a subterm of s', 
+this function will return a subterm of s' which has had the top most constructor removed. 
+ie if s' = A ; Forw x B and s = B, partial_goal will return Forw x B*)
 fun partial_goal :: "Structure \<Rightarrow> Structure \<Rightarrow> Structure" where
 (*(*uncommentL?Structure_Bin-BEGIN*)*)(*uncommentL?Structure_Bin-END*) 
 "partial_goal s (Structure_Bin l oper r) = (case (polarity_Structure s l) of N \<Rightarrow> (if s = l then l else r) | _ \<Rightarrow> l)" |
@@ -672,7 +565,7 @@ apply auto
 apply (metis polarity.exhaust polarity.simps(7) polarity.simps(8) polarity.simps(9))+
 done
 
-
+(*checks the polarity of a structure inside a sequent*)
 fun position_in_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polarity" where
 "position_in_Sequent s (Sequent l r) = (
   if s = l then -p
@@ -683,8 +576,8 @@ fun position_in_Sequent :: "Structure \<Rightarrow> Sequent \<Rightarrow> polari
 "position_in_Sequent s _ = N"
 
 
-
-
+(*the following functions are used to create fresh names for an atprop, given a sequent. 
+These functions are used by the ui for the display_tac tactic*)
 fun fresh_name_aux :: "string list \<Rightarrow> string \<Rightarrow> string set \<Rightarrow> string" where
 "fresh_name_aux [] s _ = s" |
 "fresh_name_aux (x#xs) s full = (if (s@x) \<notin> full then s@x else (fresh_name_aux xs (s@x) full) )"
@@ -722,7 +615,7 @@ fun sequent_fresh_name :: "Sequent \<Rightarrow> Structure" where
 
 
 
-export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceIntoPT isProofTreeWithCut 
+export_code open der isProofTree ruleList displayRules ant consq rulifyProoftree replaceSequentIntoPT isProofTreeWithCut 
 expandProoftree polarity_Sequent position_in_Sequent partial_goal partial_goal_complement sequent_fresh_name replace_SFAtprop_into_PT in Scala
 module_name (*calc_name-BEGIN*)SequentCalc(*calc_name-END*) file (*export_path-BEGIN*)"../scala/SequentCalc.scala"(*export_path-END*)
 end

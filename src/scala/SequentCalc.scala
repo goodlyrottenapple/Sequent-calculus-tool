@@ -1914,54 +1914,16 @@ def partial_goal(s: Structure, x1: Structure): Structure = (s, x1) match {
   case (s, Structure_Zer(v)) => Structure_Zer(v)
 }
 
-def replaceIntoPT_list(list: List[(Sequent, Sequent)], x1: List[Prooftree]):
-      List[Prooftree]
-  =
-  (list, x1) match {
-  case (list, Nil) => Nil
-  case (list, l :: ist) =>
-    replaceIntoPT_aux(list, l) :: replaceIntoPT_list(list, ist)
-}
-
-def replaceIntoPT_aux(list: List[(Sequent, Sequent)], x1: Prooftree): Prooftree
-  =
-  (list, x1) match {
-  case (list, Prooftreea(c, RuleMacro(s, pt), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c),
-                RuleMacro(s, replaceIntoPT_aux(list, pt)),
-                replaceIntoPT_list(list, ptlist))
-  case (list, Prooftreea(c, RuleCuta(v), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c), RuleCuta(v),
-                replaceIntoPT_list(list, ptlist))
-  case (list, Prooftreea(c, RuleLa(v), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c), RuleLa(v),
-                replaceIntoPT_list(list, ptlist))
-  case (list, Prooftreea(c, RuleStructa(v), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c), RuleStructa(v),
-                replaceIntoPT_list(list, ptlist))
-  case (list, Prooftreea(c, RuleZera(v), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c), RuleZera(v),
-                replaceIntoPT_list(list, ptlist))
-  case (list, Prooftreea(c, Fail(), ptlist)) =>
-    Prooftreea(replaceAll[Sequent](list, c), Fail(),
-                replaceIntoPT_list(list, ptlist))
-}
-
-def replaceIntoPT(seq: Sequent, x1: Prooftree): Prooftree = (seq, x1) match {
-  case (seq, Prooftreea(c, r, ptlist)) =>
-    replaceIntoPT_aux(match_Sequent(c, seq), Prooftreea(c, r, ptlist))
-}
-
 def rulifyFormula(x0: Formula): Formula = x0 match {
   case Formula_Atprop(Atpropa(f :: a)) =>
     (if ('A' <= f && f <= 'Z') Formula_Freevar(f :: a)
       else Formula_Atprop(Atprop_Freevar(f :: a)))
+  case Formula_Un(c, y) => Formula_Un(c, rulifyFormula(y))
   case Formula_Bin(x, c, y) =>
     Formula_Bin(rulifyFormula(x), c, rulifyFormula(y))
   case Formula_Atprop(Atpropa(Nil)) => Formula_Atprop(Atpropa(Nil))
   case Formula_Atprop(Atprop_Freevar(va)) => Formula_Atprop(Atprop_Freevar(va))
   case Formula_Freevar(v) => Formula_Freevar(v)
-  case Formula_Un(v, va) => Formula_Un(v, va)
 }
 
 def rulifyStructure(x0: Structure): Structure = x0 match {
@@ -1991,13 +1953,13 @@ def rulifySequent(x0: Sequent): Sequent = x0 match {
   case Sequent_Structure(x) => Sequent_Structure(x)
 }
 
-def replaceIntoProoftree(list: List[Prooftree], x1: Prooftree): Prooftree =
+def replacePTIntoPT(list: List[Prooftree], x1: Prooftree): Prooftree =
   (list, x1) match {
   case (Nil, Prooftreea(s, RuleZera(Prem()), Nil)) =>
     Prooftreea(s, RuleZera(Prem()), Nil)
   case (l :: ist, Prooftreea(s, RuleZera(Prem()), Nil)) =>
     (if (equal_Sequenta(concl(l), s)) l
-      else replaceIntoProoftree(ist, Prooftreea(s, RuleZera(Prem()), Nil)))
+      else replacePTIntoPT(ist, Prooftreea(s, RuleZera(Prem()), Nil)))
   case (v :: va, Prooftreea(s, RuleCuta(vb), Nil)) =>
     Prooftreea(s, RuleCuta(vb), Nil)
   case (v :: va, Prooftreea(s, RuleLa(vb), Nil)) =>
@@ -2026,90 +1988,82 @@ def replaceIntoProoftree(list: List[Prooftree], x1: Prooftree): Prooftree =
   case (v :: va, Prooftreea(s, RuleCuta(vb), vc :: vd)) =>
     Prooftreea(s, RuleCuta(vb),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vc :: vd))
   case (v :: va, Prooftreea(s, RuleLa(vb), vc :: vd)) =>
     Prooftreea(s, RuleLa(vb),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vc :: vd))
   case (v :: va, Prooftreea(s, RuleStructa(vb), vc :: vd)) =>
     Prooftreea(s, RuleStructa(vb),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vc :: vd))
   case (v :: va, Prooftreea(s, RuleZera(Id()), vb :: vc)) =>
     Prooftreea(s, RuleZera(Id()),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vb :: vc))
   case (v :: va, Prooftreea(s, RuleZera(Partial()), vb :: vc)) =>
     Prooftreea(s, RuleZera(Partial()),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vb :: vc))
   case (v :: va, Prooftreea(s, RuleMacro(vb, vc), vd :: ve)) =>
     Prooftreea(s, RuleMacro(vb, vc),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vd :: ve))
   case (v :: va, Prooftreea(s, Fail(), vb :: vc)) =>
     Prooftreea(s, Fail(),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vb :: vc))
   case (v :: va, Prooftreea(s, r, vb :: vc)) =>
     Prooftreea(s, r,
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(v :: va, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(v :: va, a),
                                  vb :: vc))
   case (list, Prooftreea(s, RuleCuta(v), va :: vb)) =>
     Prooftreea(s, RuleCuta(v),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  va :: vb))
   case (list, Prooftreea(s, RuleLa(v), va :: vb)) =>
     Prooftreea(s, RuleLa(v),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  va :: vb))
   case (list, Prooftreea(s, RuleStructa(v), va :: vb)) =>
     Prooftreea(s, RuleStructa(v),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  va :: vb))
   case (list, Prooftreea(s, RuleZera(Id()), v :: va)) =>
     Prooftreea(s, RuleZera(Id()),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  v :: va))
   case (list, Prooftreea(s, RuleZera(Partial()), v :: va)) =>
     Prooftreea(s, RuleZera(Partial()),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  v :: va))
   case (list, Prooftreea(s, RuleMacro(v, va), vb :: vc)) =>
     Prooftreea(s, RuleMacro(v, va),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  vb :: vc))
   case (list, Prooftreea(s, Fail(), v :: va)) =>
     Prooftreea(s, Fail(),
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  v :: va))
   case (list, Prooftreea(s, r, v :: va)) =>
     Prooftreea(s, r,
                 map[Prooftree,
-                     Prooftree]((a: Prooftree) => replaceIntoProoftree(list, a),
+                     Prooftree]((a: Prooftree) => replacePTIntoPT(list, a),
                                  v :: va))
 }
 
@@ -2118,9 +2072,9 @@ def expandProoftree(x0: Prooftree): Prooftree = x0 match {
     Prooftreea(s, r,
                 map[Prooftree,
                      Prooftree]((a: Prooftree) =>
-                                  replaceIntoProoftree(map[Prooftree,
-                    Prooftree]((aa: Prooftree) => expandProoftree(aa), list),
-                a),
+                                  replacePTIntoPT(map[Prooftree,
+               Prooftree]((aa: Prooftree) => expandProoftree(aa), list),
+           a),
                                  map[Prooftree,
                                       Prooftree]((a: Prooftree) =>
            expandProoftree(a),
@@ -2350,6 +2304,47 @@ def position_in_Sequent(s: Structure, x1: Sequent): polarity = (s, x1) match {
                     else (if (! (equal_polarity(polarity_Structure(s, r), N())))
                            Plus() else N()))))
   case (s, Sequent_Structure(v)) => N()
+}
+
+def replaceSequentIntoPT_list(list: List[(Sequent, Sequent)],
+                               x1: List[Prooftree]):
+      List[Prooftree]
+  =
+  (list, x1) match {
+  case (list, Nil) => Nil
+  case (list, l :: ist) =>
+    replaceSequentIntoPT_aux(list, l) :: replaceSequentIntoPT_list(list, ist)
+}
+
+def replaceSequentIntoPT_aux(list: List[(Sequent, Sequent)], x1: Prooftree):
+      Prooftree
+  =
+  (list, x1) match {
+  case (list, Prooftreea(c, RuleMacro(s, pt), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c),
+                RuleMacro(s, replaceSequentIntoPT_aux(list, pt)),
+                replaceSequentIntoPT_list(list, ptlist))
+  case (list, Prooftreea(c, RuleCuta(v), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c), RuleCuta(v),
+                replaceSequentIntoPT_list(list, ptlist))
+  case (list, Prooftreea(c, RuleLa(v), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c), RuleLa(v),
+                replaceSequentIntoPT_list(list, ptlist))
+  case (list, Prooftreea(c, RuleStructa(v), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c), RuleStructa(v),
+                replaceSequentIntoPT_list(list, ptlist))
+  case (list, Prooftreea(c, RuleZera(v), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c), RuleZera(v),
+                replaceSequentIntoPT_list(list, ptlist))
+  case (list, Prooftreea(c, Fail(), ptlist)) =>
+    Prooftreea(replaceAll[Sequent](list, c), Fail(),
+                replaceSequentIntoPT_list(list, ptlist))
+}
+
+def replaceSequentIntoPT(seq: Sequent, x1: Prooftree): Prooftree = (seq, x1)
+  match {
+  case (seq, Prooftreea(c, r, ptlist)) =>
+    replaceSequentIntoPT_aux(match_Sequent(c, seq), Prooftreea(c, r, ptlist))
 }
 
 def partial_goal_complement(s: Structure, x1: Structure): Structure = (s, x1)
