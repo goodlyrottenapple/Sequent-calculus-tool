@@ -21,6 +21,17 @@ fun formula_list_to_structure :: "Formula list \<Rightarrow> Structure" where
 fun sequentCalculus_to_sequentCalc_SE :: "sequent \<Rightarrow> Sequent" ("<< _") where
 "sequentCalculus_to_sequentCalc_SE (X \<turnstile> Y) = formula_list_to_structure X \<turnstile>\<^sub>S formula_list_to_structure Y"
 
+lemma is_id: "sequentCalc_SE_to_sequentCalculus \<circ> sequentCalculus_to_sequentCalc_SE = id"
+apply rule
+unfolding id_def
+apply (induct_tac x)
+apply (induct_tac x1a)
+apply simp
+apply (induct_tac x2a)
+apply simp
+unfolding formula_list_to_structure.simps structure_to_formula_list.simps
+using SequentCalculus.concat_def by auto
+
 lemma P_L'': "loc \<turnstile>D ((X1 ; [A]) ; (B ; X2) \<turnstile> Y) \<Longrightarrow> loc \<turnstile>D ((X1 ; B) ; ([A] ; X2) \<turnstile> Y)"
 proof (induct B arbitrary: X1 X2 A)
 case Nil 
