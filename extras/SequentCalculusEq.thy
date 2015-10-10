@@ -8,7 +8,7 @@ fun structure_to_formula_list :: "Structure \<Rightarrow> Formula list" where
 "structure_to_formula_list (X ,\<^sub>S Y) = (structure_to_formula_list X) ; (structure_to_formula_list Y)" |
 "structure_to_formula_list _ = []"
 
-
+(* function that converts terms from our calculus to the wiki calculus terms *)
 fun sequentCalc_SE_to_sequentCalculus :: "Sequent \<Rightarrow> sequent" (">> _") where
 "sequentCalc_SE_to_sequentCalculus (X \<turnstile>\<^sub>S Y) = structure_to_formula_list X \<turnstile> structure_to_formula_list Y" |
 "sequentCalc_SE_to_sequentCalculus _ = [] \<turnstile> []"
@@ -17,10 +17,12 @@ fun formula_list_to_structure :: "Formula list \<Rightarrow> Structure" where
 "formula_list_to_structure [] = I"|
 "formula_list_to_structure (x#xs) = Structure_Comma (x \<^sub>S) (formula_list_to_structure xs)"
 
-
+(* function that converts terms from the wiki calculus to terms of our calculus *)
 fun sequentCalculus_to_sequentCalc_SE :: "sequent \<Rightarrow> Sequent" ("<< _") where
 "sequentCalculus_to_sequentCalc_SE (X \<turnstile> Y) = formula_list_to_structure X \<turnstile>\<^sub>S formula_list_to_structure Y"
 
+
+(* proof that (>> o <<) = id *)
 lemma is_id: "sequentCalc_SE_to_sequentCalculus \<circ> sequentCalculus_to_sequentCalc_SE = id"
 apply rule
 unfolding id_def
