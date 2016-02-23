@@ -346,8 +346,7 @@ case Nil
   using Nil by (metis A_L2 I_L_R formula_list_to_structure.simps(1))
 next
 case (Cons Y Ys)
-  have subst1: "X ; (Y # Ys) = X;(Y#Ys)" by (simp add: SequentCalculus.concat_def)
-  have subst2: "(Y # Ys) ; X = Y # (Ys ; X)" by (simp add: SequentCalculus.concat_def)
+  have subst: "(Y # Ys) ; X = Y # (Ys ; X)" by (simp add: SequentCalculus.concat_def)
   
   have "loc \<turnstile>d (A ,\<^sub>S (Y \<^sub>S)) ,\<^sub>S (formula_list_to_structure X ,\<^sub>S formula_list_to_structure Ys) \<turnstile>\<^sub>S Z"
 
@@ -357,9 +356,8 @@ case (Cons Y Ys)
   
   with Cons(1) have 1: "loc \<turnstile>d (A ,\<^sub>S (Y \<^sub>S)) ,\<^sub>S formula_list_to_structure (X ; Ys) \<turnstile>\<^sub>S Z" by simp
   show ?case
-  apply(subst subst1)
   apply(rule formula_list_to_structure_der_P_L)
-  apply(subst subst2)
+  apply(subst subst)
   apply simp
   apply (rule derivable.A_L)
   apply(rule formula_list_to_structure_der_P_L)
